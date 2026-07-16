@@ -6,6 +6,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
 // Icons that exist in the symbolic theme on GNOME.
 const ICON_HEADSET = 'audio-headset-symbolic';      // has a mic (hands-free / headset profile)
@@ -61,6 +62,14 @@ function classifyOutput(stream) {
     return 'speakers';
 }
 
+// Menu label for a Gvc.MixerUIDevice, same style as GNOME Quick Settings:
+// "Headphones – Built-in Audio", "WH-1000XM4", ...
+function deviceLabel(device) {
+    const description = device.get_description() || 'Unknown device';
+    const origin = device.get_origin();
+    return origin ? `${description} – ${origin}` : description;
+}
+
 const HeadsetIndicator = GObject.registerClass(
 class HeadsetIndicator extends PanelMenu.Button {
     _init() {
@@ -72,12 +81,18 @@ class HeadsetIndicator extends PanelMenu.Button {
         });
         this.add_child(this._icon);
 
-        // A small menu line showing the current output device.
-        this._deviceItem = new PopupMenu.PopupMenuItem('', {
-            reactive: false,
-            can_focus: false,
-        });
-        this.menu.addMenuItem(this._deviceItem);
+        // One switchable menu item per output device (Gvc.MixerUIDevice,
+        // i.e. per port: "Speakers" and "Headphones" on the same card are
+        // separate entries, like in GNOME's own output chooser).
+        this._deviceItems = new Map(); // Gvc device id -> PopupImageMenuItem
+        this._activeId = 0;
+
+        this._deviceSection = new PopupMenu.PopupMenuSection();
+        this.menu.addMenuItem(this._deviceSection);
+
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addAction('Sound Settings…',
+            () => Util.spawn(['gnome-control-center', 'sound']));
 
         // Use our own mixer control so the extension is self-contained and
         // does not depend on private shell internals across versions.
@@ -86,11 +101,50 @@ class HeadsetIndicator extends PanelMenu.Button {
         this._control.connectObject(
             'state-changed', () => this._sync(),
             'default-sink-changed', () => this._sync(),
-            'active-output-update', () => this._sync(),
+            'active-output-update', (_c, id) => {
+                this._activeId = id;
+                this._syncActive();
+                this._sync();
+            },
+            'output-added', (_c, id) => this._addOutput(id),
+            'output-removed', (_c, id) => this._removeOutput(id),
             this);
 
         this._control.open();
         this._sync();
+    }
+
+    _addOutput(id) {
+        if (this._deviceItems.has(id))
+            return;
+        const device = this._control.lookup_output_id(id);
+        if (!device)
+            return;
+
+        const item = new PopupMenu.PopupImageMenuItem(
+            deviceLabel(device),
+            device.get_icon_name() || ICON_SPEAKERS);
+        item.connect('activate', () => {
+            const dev = this._control.lookup_output_id(id);
+            if (dev)
+                this._control.change_output(dev);
+        });
+        this._deviceSection.addMenuItem(item);
+        this._deviceItems.set(id, item);
+        this._syncActive();
+    }
+
+    _removeOutput(id) {
+        this._deviceItems.get(id)?.destroy();
+        this._deviceItems.delete(id);
+    }
+
+    _syncActive() {
+        for (const [id, item] of this._deviceItems) {
+            item.setOrnament(id === this._activeId
+                ? PopupMenu.Ornament.CHECK
+                : PopupMenu.Ornament.NONE);
+        }
     }
 
     _sync() {
@@ -98,9 +152,17 @@ class HeadsetIndicator extends PanelMenu.Button {
             return;
 
         const sink = this._control.get_default_sink();
-        const kind = classifyOutput(sink);
 
-        switch (kind) {
+        // Keep the checkmark right even if no active-output-update was
+        // emitted (e.g. right after opening the control).
+        if (sink) {
+            const dev = this._control.lookup_device_from_stream(sink);
+            if (dev)
+                this._activeId = dev.get_id();
+            this._syncActive();
+        }
+
+        switch (classifyOutput(sink)) {
         case 'headset':
             this._icon.icon_name = ICON_HEADSET;
             break;
@@ -111,9 +173,6 @@ class HeadsetIndicator extends PanelMenu.Button {
             this._icon.icon_name = ICON_SPEAKERS;
             break;
         }
-
-        const name = sink ? sink.get_description() : 'No output';
-        this._deviceItem.label.text = `${name}`;
     }
 
     destroy() {
@@ -122,6 +181,7 @@ class HeadsetIndicator extends PanelMenu.Button {
             this._control.close();
             this._control = null;
         }
+        this._deviceItems.clear();
         super.destroy();
     }
 });
