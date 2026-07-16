@@ -1,0 +1,8 @@
+{
+  "uuid": "headset-indicator@chenxi",
+  "name": "Headset Indicator",
+  "description": "Shows a headphone/headset icon in the top bar when the active audio output is a headset (Bluetooth, USB, or the analog jack), and a speaker icon otherwise. Click for the current device name.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "version": 1,
+  "settings-schema": ""
+}

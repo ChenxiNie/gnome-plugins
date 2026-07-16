@@ -1,0 +1,7 @@
+{
+  "uuid": "three-finger-drag@chenxi",
+  "name": "Three Finger Drag",
+  "description": "macOS-style trackpad gestures: a three-finger drag acts as a held left mouse button (drag a titlebar to move the window, drag over text to select, drag an icon to move it); a four-finger horizontal swipe opens an alt-tab style window switcher that tracks swipe distance live, and four-finger vertical toggles the overview. Configurable in extension.js.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "version": 1
+}

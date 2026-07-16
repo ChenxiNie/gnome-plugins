@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component>
+  <name>org.freedesktop.IBus.LongPressUS</name>
+  <description>macOS-style long-press accent picker</description>
+  <exec>@ENGINE_EXEC@ --ibus</exec>
+  <version>0.1</version>
+  <author>chenxi</author>
+  <license>MIT</license>
+  <homepage></homepage>
+  <textdomain>ibus-longpress</textdomain>
+  <engines>
+    <engine>
+      <name>longpress-us</name>
+      <language>en</language>
+      <license>MIT</license>
+      <author>chenxi</author>
+      <icon></icon>
+      <layout>us</layout>
+      <longname>English (US, long-press accents)</longname>
+      <description>US keyboard with a macOS-style long-press accent picker</description>
+      <symbol>en</symbol>
+      <rank>1</rank>
+    </engine>
+  </engines>
+</component>
