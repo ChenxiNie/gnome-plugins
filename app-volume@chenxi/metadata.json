@@ -1,0 +1,7 @@
+{
+  "uuid": "app-volume@chenxi",
+  "name": "App Volume",
+  "description": "Adjust or mute each application's playback volume from the top bar.",
+  "shell-version": ["50"],
+  "version": 1
+}

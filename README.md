@@ -4,6 +4,7 @@ Personal GNOME desktop plugins for Ubuntu (GNOME Shell 45–50, Wayland).
 
 | Plugin | What it does |
 |---|---|
+| [App Volume](app-volume@chenxi/) | GNOME 50 extension for one-click per-app mute and volume sliders in the top bar. |
 | [`headset-indicator@chenxi`](headset-indicator@chenxi/) | GNOME Shell extension: shows a headphone icon in the top bar when the active audio output is a headset (Bluetooth, USB, or analog jack), a speaker icon otherwise; click for the device name. |
 | [`three-finger-drag@chenxi`](three-finger-drag@chenxi/) | GNOME Shell extension: macOS-style trackpad gestures — three-finger drag acts as a held left mouse button (move windows, select text, drag icons); four-finger horizontal swipe opens a live window switcher, four-finger vertical toggles the overview. |
 | [`long-press-for-German-letters`](long-press-for-German-letters/) | IBus input-method engine: macOS-style press-and-hold accent picker — hold `u` for `ü û ù ú ū`, hold `s` for `ß`, pick by number/arrows/click. Not a Shell extension (Wayland doesn't let extensions intercept typing); see its README for how it works. |

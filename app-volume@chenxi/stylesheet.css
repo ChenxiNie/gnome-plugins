@@ -1,0 +1,21 @@
+.app-volume-list {
+    min-width: 19em;
+    max-height: 24em;
+}
+
+.app-volume-row {
+    padding: 0.35em 0.7em 0.5em 0;
+    spacing: 0.2em;
+}
+
+.app-volume-line {
+    spacing: 0.6em;
+}
+
+.app-volume-percentage {
+    text-align: right;
+}
+
+.app-volume-mute {
+    padding: 0.4em;
+}
